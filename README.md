@@ -32,6 +32,9 @@ Run `:PartialStage` to open the status buffer.
 ```
 s:stage/unstage  x:discard  <Tab>:fold  gs:split  <CR>:jump  q:close
 
+Untracked (1)
+    src/new_file.lua
+
 Unstaged (2)
   v src/file_a.lua
     @@ -16,10 +17,14 @@
@@ -42,9 +45,6 @@ Unstaged (2)
 
 Staged (1)
   > src/file_c.lua
-
-Untracked (1)
-    src/new_file.lua
 ```
 
 ## Keymaps

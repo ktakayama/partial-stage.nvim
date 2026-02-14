@@ -104,6 +104,30 @@ local function build_tree(outline, unstaged_files, staged_files, untracked_files
   -- Help line
   build_help_lines(outline)
 
+  -- Untracked section
+  if untracked_files and #untracked_files > 0 then
+    local untracked_section = outliner.add_node(outline.root, {
+      type = "section",
+      text = string.format("Untracked (%d)", #untracked_files),
+      hl_group = "PartialStageSection",
+      section = "untracked",
+    })
+
+    for _, file in ipairs(untracked_files) do
+      outliner.add_node(untracked_section, {
+        type = "file",
+        text = file.b_file,
+        hl_group = "PartialStageFile",
+        file_data = file,
+        section = "untracked",
+        collapsed = false,
+      })
+    end
+
+    -- Blank line
+    outliner.add_node(outline.root, { type = "blank", text = "" })
+  end
+
   -- Unstaged section
   local unstaged_section = outliner.add_node(outline.root, {
     type = "section",
@@ -200,30 +224,6 @@ local function build_tree(outline, unstaged_files, staged_files, untracked_files
           hunk_line_index = line_idx,
         })
       end
-    end
-  end
-
-  -- Untracked section
-  if untracked_files and #untracked_files > 0 then
-    -- Blank line
-    outliner.add_node(outline.root, { type = "blank", text = "" })
-
-    local untracked_section = outliner.add_node(outline.root, {
-      type = "section",
-      text = string.format("Untracked (%d)", #untracked_files),
-      hl_group = "PartialStageSection",
-      section = "untracked",
-    })
-
-    for _, file in ipairs(untracked_files) do
-      outliner.add_node(untracked_section, {
-        type = "file",
-        text = file.b_file,
-        hl_group = "PartialStageFile",
-        file_data = file,
-        section = "untracked",
-        collapsed = false,
-      })
     end
   end
 end

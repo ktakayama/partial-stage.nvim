@@ -213,4 +213,128 @@ function M.make_partial_patch(file, hunk, selected_indices, mode)
   return table.concat(parts, "\n") .. "\n"
 end
 
+-- Split a hunk into smaller hunks at context-line boundaries
+-- A "change group" is a contiguous block of +/- lines.
+-- Groups separated by context lines become separate hunks.
+function M.split_hunk(hunk)
+  local groups = {}
+  local current_group = nil
+  local context_buffer = {}
+
+  for _, line in ipairs(hunk.lines) do
+    local prefix = line:sub(1, 1)
+
+    if prefix == "+" or prefix == "-" then
+      -- Start a new group if needed
+      if not current_group then
+        current_group = {
+          leading_context = {},
+          changes = {},
+          trailing_context = {},
+        }
+        -- Move context_buffer to leading_context of new group
+        -- (also trailing_context of previous group)
+        if #groups > 0 then
+          local prev = groups[#groups]
+          -- Split context: first half to previous trailing, second half to current leading
+          local split_at = math.ceil(#context_buffer / 2)
+          for i = 1, #context_buffer do
+            if i <= split_at then
+              table.insert(prev.trailing_context, context_buffer[i])
+            else
+              table.insert(current_group.leading_context, context_buffer[i])
+            end
+          end
+        else
+          -- First group gets all context as leading
+          for _, ctx in ipairs(context_buffer) do
+            table.insert(current_group.leading_context, ctx)
+          end
+        end
+        context_buffer = {}
+        table.insert(groups, current_group)
+      end
+      table.insert(current_group.changes, line)
+    elseif prefix == " " then
+      if current_group then
+        -- Context line after changes: end current group
+        table.insert(context_buffer, line)
+        current_group = nil
+      else
+        table.insert(context_buffer, line)
+      end
+    else
+      -- "\ No newline" or other
+      if current_group then
+        table.insert(current_group.changes, line)
+      end
+    end
+  end
+
+  -- Handle trailing context for the last group
+  if #groups > 0 and #context_buffer > 0 then
+    local last = groups[#groups]
+    for _, ctx in ipairs(context_buffer) do
+      table.insert(last.trailing_context, ctx)
+    end
+  end
+
+  -- If only one group (or none), the hunk cannot be split
+  if #groups <= 1 then
+    return nil
+  end
+
+  -- Build new hunks from groups
+  local result = {}
+  local old_offset = hunk.header.old_start
+  local new_offset = hunk.header.new_start
+
+  for _, group in ipairs(groups) do
+    local lines = {}
+    local old_count = 0
+    local new_count = 0
+
+    for _, l in ipairs(group.leading_context) do
+      table.insert(lines, l)
+      old_count = old_count + 1
+      new_count = new_count + 1
+    end
+
+    for _, l in ipairs(group.changes) do
+      table.insert(lines, l)
+      local p = l:sub(1, 1)
+      if p == "-" then
+        old_count = old_count + 1
+      elseif p == "+" then
+        new_count = new_count + 1
+      end
+    end
+
+    for _, l in ipairs(group.trailing_context) do
+      table.insert(lines, l)
+      old_count = old_count + 1
+      new_count = new_count + 1
+    end
+
+    local new_header = {
+      old_start = old_offset,
+      old_count = old_count,
+      new_start = new_offset,
+      new_count = new_count,
+    }
+
+    table.insert(result, {
+      header = new_header,
+      header_line = M.make_hunk_header(new_header),
+      lines = lines,
+    })
+
+    -- Advance offsets for next sub-hunk
+    old_offset = old_offset + old_count
+    new_offset = new_offset + new_count
+  end
+
+  return result
+end
+
 return M

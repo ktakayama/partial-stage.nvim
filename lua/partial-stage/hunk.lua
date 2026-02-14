@@ -248,9 +248,34 @@ function M.jump_to_file()
   vim.api.nvim_win_set_cursor(0, { line, 0 })
 end
 
--- Split hunk under cursor (placeholder for Step 8)
+-- Split hunk under cursor into smaller hunks
 function M.split()
-  vim.notify("Hunk splitting not yet implemented", vim.log.levels.INFO)
+  local ctx = get_hunk_context()
+  if not ctx or not ctx.hunk then
+    vim.notify("No hunk under cursor to split", vim.log.levels.WARN)
+    return
+  end
+
+  local sub_hunks = parser.split_hunk(ctx.hunk)
+  if not sub_hunks then
+    vim.notify("Hunk cannot be split further", vim.log.levels.INFO)
+    return
+  end
+
+  -- Replace the original hunk with sub-hunks in file_data
+  local file = ctx.file
+  for i, hunk in ipairs(file.hunks) do
+    if hunk == ctx.hunk then
+      table.remove(file.hunks, i)
+      for j, sub in ipairs(sub_hunks) do
+        table.insert(file.hunks, i + j - 1, sub)
+      end
+      break
+    end
+  end
+
+  -- Refresh the display
+  status.refresh()
 end
 
 return M

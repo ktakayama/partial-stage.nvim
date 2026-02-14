@@ -42,6 +42,9 @@ Unstaged (2)
 
 Staged (1)
   > src/file_c.lua
+
+Untracked (1)
+    src/new_file.lua
 ```
 
 ## Keymaps

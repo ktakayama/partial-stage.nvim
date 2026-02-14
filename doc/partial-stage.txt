@@ -1,0 +1,128 @@
+*partial-stage.txt*    Git add -p functionality within Neovim
+
+Author:  ktakayama
+License: MIT
+
+==============================================================================
+CONTENTS                                          *partial-stage-contents*
+
+  1. Introduction .......................... |partial-stage-introduction|
+  2. Requirements .......................... |partial-stage-requirements|
+  3. Usage ................................. |partial-stage-usage|
+  4. Configuration ......................... |partial-stage-configuration|
+  5. Keymaps ............................... |partial-stage-keymaps|
+  6. Highlights ............................ |partial-stage-highlights|
+  7. Commands .............................. |partial-stage-commands|
+
+==============================================================================
+1. INTRODUCTION                                *partial-stage-introduction*
+
+partial-stage.nvim provides `git add -p` functionality within Neovim.
+It displays diffs from multiple files in a single buffer, allowing
+selective staging of hunks.
+
+The status buffer shows:
+- Current branch and last commit message
+- Unstaged changes with expandable file/hunk tree
+- Staged changes with expandable file/hunk tree
+
+==============================================================================
+2. REQUIREMENTS                                *partial-stage-requirements*
+
+- Neovim >= 0.10.0
+- Git
+
+==============================================================================
+3. USAGE                                            *partial-stage-usage*
+
+Run `:PartialStage` to open the status buffer.
+
+In the status buffer, navigate to a hunk and press `dp` to stage it
+(in the Unstaged section) or unstage it (in the Staged section).
+
+Use visual selection + `dp` to stage/unstage specific lines within
+a hunk.
+
+==============================================================================
+4. CONFIGURATION                            *partial-stage-configuration*
+
+Call `setup()` to configure the plugin. All options are optional.
+>lua
+  require("partial-stage").setup({
+    window = {
+      position = "topleft vsplit",  -- split command
+      width = 60,                   -- window width
+    },
+    signs = {
+      collapsed = ">",
+      expanded = "v",
+    },
+    keymaps = {
+      toggle_stage = "dp",    -- stage or unstage hunk/file
+      discard = "x",          -- discard hunk (unstaged only)
+      toggle_fold = "<Tab>",  -- toggle file fold
+      jump = "<CR>",          -- jump to file
+      split_hunk = "gs",      -- split hunk into smaller hunks
+      close = "q",            -- close window
+    },
+  })
+<
+
+Set any keymap to `false` to disable it.
+
+==============================================================================
+5. KEYMAPS                                        *partial-stage-keymaps*
+
+These keymaps are active in the partial-stage status buffer.
+All are configurable via |partial-stage-configuration|.
+
+                                                  *partial-stage-dp*
+dp              Stage the hunk under the cursor (Unstaged section) or
+                unstage it (Staged section). On a file node, stage/unstage
+                the entire file.
+
+                In visual mode, stage/unstage only the selected lines.
+
+                                                  *partial-stage-x*
+x               Discard the hunk under the cursor. Only works in the
+                Unstaged section. Prompts for confirmation.
+
+                In visual mode, discard only the selected lines.
+
+                                                  *partial-stage-Tab*
+<Tab>           Toggle fold on the file node under the cursor.
+
+                                                  *partial-stage-CR*
+<CR>            Jump to the file and line corresponding to the hunk
+                under the cursor.
+
+                                                  *partial-stage-gs*
+gs              Split the hunk under the cursor into smaller hunks
+                at context-line boundaries.
+
+                                                  *partial-stage-q*
+q               Close the partial-stage window.
+
+==============================================================================
+6. HIGHLIGHTS                                  *partial-stage-highlights*
+
+The following highlight groups are used. All link to built-in groups
+by default and can be overridden.
+
+  PartialStageBranch      Branch/head info (links to `Title`)
+  PartialStageSection     Section headers (links to `Label`)
+  PartialStageFile        File paths (links to `Directory`)
+  PartialStageHunkHeader  Hunk headers (links to `Function`)
+  PartialStageHelp        Help line (links to `Comment`)
+
+Diff lines use the built-in `DiffAdd` and `DiffDelete` groups.
+
+==============================================================================
+7. COMMANDS                                      *partial-stage-commands*
+
+                                                  *:PartialStage*
+:PartialStage   Open the partial-stage status buffer. If already open,
+                focus and refresh it.
+
+==============================================================================
+ vim:tw=78:ts=8:ft=help:norl:

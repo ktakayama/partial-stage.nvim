@@ -187,6 +187,14 @@ function M.toggle_stage_visual()
   end
 end
 
+-- Confirm before destructive operation
+local function confirm(prompt, on_yes)
+  local choice = vim.fn.confirm(prompt, "&Yes\n&No", 2)
+  if choice == 1 then
+    on_yes()
+  end
+end
+
 -- Discard hunk under cursor (normal mode, unstaged only)
 function M.discard()
   local ctx = get_hunk_context()
@@ -196,20 +204,34 @@ function M.discard()
   end
 
   if ctx.hunk and ctx.file then
-    vim.ui.select({ "Yes", "No" }, { prompt = "Discard this hunk?" }, function(choice)
-      if choice == "Yes" then
-        M.discard_hunk(ctx.file, ctx.hunk, function()
-          status.refresh()
-        end)
-      end
+    confirm("Discard this hunk?", function()
+      M.discard_hunk(ctx.file, ctx.hunk, function()
+        status.refresh()
+      end)
     end)
   end
 end
 
 -- Discard visually selected lines (unstaged only)
 function M.discard_visual()
+  -- Capture context while still in visual mode
+  local ctx = get_hunk_context()
   vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
-  M.discard()
+
+  if not ctx or ctx.section ~= "unstaged" then
+    vim.notify("Discard only works in the Unstaged section", vim.log.levels.WARN)
+    return
+  end
+
+  if ctx.hunk and ctx.file then
+    vim.schedule(function()
+      confirm("Discard this hunk?", function()
+        M.discard_hunk(ctx.file, ctx.hunk, function()
+          status.refresh()
+        end)
+      end)
+    end)
+  end
 end
 
 -- Jump to file at cursor position
@@ -246,20 +268,31 @@ function M.split()
     return
   end
 
-  -- Replace the original hunk with sub-hunks in file_data
-  local file = ctx.file
-  for i, hunk in ipairs(file.hunks) do
-    if hunk == ctx.hunk then
-      table.remove(file.hunks, i)
-      for j, sub in ipairs(sub_hunks) do
-        table.insert(file.hunks, i + j - 1, sub)
+  -- Replace the original hunk with sub-hunks in the in-memory file data
+  local section_files
+  if ctx.section == "unstaged" then
+    section_files = status.get_state().unstaged_files
+  else
+    section_files = status.get_state().staged_files
+  end
+
+  for _, file in ipairs(section_files) do
+    if file == ctx.file then
+      for i, hunk in ipairs(file.hunks) do
+        if hunk == ctx.hunk then
+          table.remove(file.hunks, i)
+          for j, sub in ipairs(sub_hunks) do
+            table.insert(file.hunks, i + j - 1, sub)
+          end
+          break
+        end
       end
       break
     end
   end
 
-  -- Refresh the display
-  status.refresh()
+  -- Rebuild display from in-memory data (don't re-fetch from git)
+  status.refresh_display()
 end
 
 return M

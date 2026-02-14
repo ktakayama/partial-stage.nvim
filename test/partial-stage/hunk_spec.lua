@@ -83,6 +83,54 @@ describe("hunk operations", function()
     end)
   end)
 
+  describe("make_partial_patch for discard", function()
+    it("discards only selected added lines, keeps others as context", function()
+      local files = parser.parse(sample_diff)
+      local hunk = files[1].hunks[1]
+
+      -- hunk.lines: 1=" line1", 2=" line2", 3="-old line3",
+      --             4="+new line3", 5="+added line3a", 6=" line4", 7=" line5"
+      -- Select only "+new line3" (index 4) for discard
+      local patch = parser.make_partial_patch(files[1], hunk, { 4 }, "discard")
+
+      -- Selected "+" line stays as "+"
+      assert.is_truthy(patch:match("%+new line3"))
+      -- Unselected "+" becomes context (exists in working tree)
+      assert.is_truthy(patch:match(" added line3a"))
+      assert.is_falsy(patch:match("%+added line3a"))
+      -- Unselected "-" is omitted (not in working tree)
+      assert.is_falsy(patch:match("old line3"))
+    end)
+
+    it("discards only selected removed lines", function()
+      local files = parser.parse(sample_diff)
+      local hunk = files[1].hunks[1]
+
+      -- Select only "-old line3" (index 3) for discard
+      local patch = parser.make_partial_patch(files[1], hunk, { 3 }, "discard")
+
+      -- Selected "-" line stays as "-"
+      assert.is_truthy(patch:match("%-old line3"))
+      -- Unselected "+" lines become context
+      assert.is_truthy(patch:match(" new line3"))
+      assert.is_truthy(patch:match(" added line3a"))
+    end)
+
+    it("handles all change lines selected for discard", function()
+      local files = parser.parse(sample_diff)
+      local hunk = files[1].hunks[1]
+
+      -- Select all changed lines (indices 3, 4, 5) for discard
+      local patch = parser.make_partial_patch(files[1], hunk, { 3, 4, 5 }, "discard")
+
+      assert.is_truthy(patch:match("%-old line3"))
+      assert.is_truthy(patch:match("%+new line3"))
+      assert.is_truthy(patch:match("%+added line3a"))
+      -- old=5 (4 context + 1 removal), new=6 (4 context + 2 additions)
+      assert.is_truthy(patch:match("@@ %-1,5 %+1,6 @@"))
+    end)
+  end)
+
   describe("patch reconstruction for new files", function()
     it("handles new file diffs", function()
       local diff = table.concat({

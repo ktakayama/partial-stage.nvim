@@ -157,7 +157,11 @@ end
 
 -- Reconstruct a partial patch from selected lines within a hunk
 -- selected_indices: list of 1-based indices into hunk.lines that are selected
--- mode: "stage" or "unstage"
+-- mode: "stage" - patch is relative to the original file (for git apply --cached)
+--        "discard" - patch is relative to the working tree (for git apply --reverse)
+--
+-- For "stage":  unselected "-" → context (exists in original), unselected "+" → omit
+-- For "discard": unselected "-" → omit (not in working tree), unselected "+" → context (in working tree)
 function M.make_partial_patch(file, hunk, selected_indices, mode)
   local selected_set = {}
   for _, idx in ipairs(selected_indices) do
@@ -181,8 +185,10 @@ function M.make_partial_patch(file, hunk, selected_indices, mode)
       if selected_set[i] then
         table.insert(new_lines, line)
         old_count = old_count + 1
+      elseif mode == "discard" then
+        -- Not in working tree: omit entirely
       else
-        -- Convert to context line
+        -- In original file: convert to context line
         table.insert(new_lines, " " .. line:sub(2))
         old_count = old_count + 1
         new_count = new_count + 1
@@ -191,8 +197,13 @@ function M.make_partial_patch(file, hunk, selected_indices, mode)
       if selected_set[i] then
         table.insert(new_lines, line)
         new_count = new_count + 1
+      elseif mode == "discard" then
+        -- In working tree: convert to context line
+        table.insert(new_lines, " " .. line:sub(2))
+        old_count = old_count + 1
+        new_count = new_count + 1
       else
-        -- Simply omit the line
+        -- Not in original file: omit entirely
       end
     end
   end

@@ -67,7 +67,7 @@ end
 
 -- Discard partial hunk (selected lines only)
 function M.discard_partial(file, hunk, selected_indices, on_done)
-  local patch = parser.make_partial_patch(file, hunk, selected_indices, "stage")
+  local patch = parser.make_partial_patch(file, hunk, selected_indices, "discard")
   git.apply_patch(patch, { "--reverse", "--whitespace=nowarn" }, function(_, err)
     if err then
       vim.notify("Failed to discard partial hunk: " .. err, vim.log.levels.ERROR)

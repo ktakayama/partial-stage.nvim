@@ -12,6 +12,7 @@ local state = {
   -- Parsed diff data
   unstaged_files = {},
   staged_files = {},
+  untracked_files = {},
   -- Raw diff text (for patch reconstruction)
   unstaged_diff = "",
   staged_diff = "",
@@ -97,7 +98,7 @@ local function build_help_lines(outline)
 end
 
 -- Build the tree from parsed diff data
-local function build_tree(outline, unstaged_files, staged_files)
+local function build_tree(outline, unstaged_files, staged_files, untracked_files)
   outline:clear()
 
   -- Help line
@@ -201,6 +202,30 @@ local function build_tree(outline, unstaged_files, staged_files)
       end
     end
   end
+
+  -- Untracked section
+  if untracked_files and #untracked_files > 0 then
+    -- Blank line
+    outliner.add_node(outline.root, { type = "blank", text = "" })
+
+    local untracked_section = outliner.add_node(outline.root, {
+      type = "section",
+      text = string.format("Untracked (%d)", #untracked_files),
+      hl_group = "PartialStageSection",
+      section = "untracked",
+    })
+
+    for _, file in ipairs(untracked_files) do
+      outliner.add_node(untracked_section, {
+        type = "file",
+        text = file.b_file,
+        hl_group = "PartialStageFile",
+        file_data = file,
+        section = "untracked",
+        collapsed = false,
+      })
+    end
+  end
 end
 
 -- Setup highlight groups
@@ -218,9 +243,10 @@ function M.refresh()
     return
   end
 
-  local pending = 2
+  local pending = 3
   local unstaged_diff = ""
   local staged_diff = ""
+  local untracked_files = {}
 
   local function on_all_done()
     pending = pending - 1
@@ -232,6 +258,7 @@ function M.refresh()
     state.staged_diff = staged_diff
     state.unstaged_files = parser.parse(unstaged_diff)
     state.staged_files = parser.parse(staged_diff)
+    state.untracked_files = untracked_files
 
     if not state.outline then
       state.outline = outliner.new(state.bufnr)
@@ -243,7 +270,7 @@ function M.refresh()
       cursor = vim.api.nvim_win_get_cursor(state.winid)
     end
 
-    build_tree(state.outline, state.unstaged_files, state.staged_files)
+    build_tree(state.outline, state.unstaged_files, state.staged_files, state.untracked_files)
     state.outline:render()
 
     -- Restore cursor position
@@ -265,6 +292,19 @@ function M.refresh()
     staged_diff = out or ""
     on_all_done()
   end)
+
+  git.get_status(function(out, _)
+    untracked_files = {}
+    if out then
+      for line in out:gmatch("[^\n]+") do
+        if line:match("^%?%?") then
+          local path = line:sub(4)
+          table.insert(untracked_files, { b_file = path, hunks = {} })
+        end
+      end
+    end
+    on_all_done()
+  end)
 end
 
 -- Rebuild tree display from current in-memory data (without re-fetching git)
@@ -282,7 +322,7 @@ function M.refresh_display()
     cursor = vim.api.nvim_win_get_cursor(state.winid)
   end
 
-  build_tree(state.outline, state.unstaged_files, state.staged_files)
+  build_tree(state.outline, state.unstaged_files, state.staged_files, state.untracked_files)
   state.outline:render()
 
   if cursor and state.winid and vim.api.nvim_win_is_valid(state.winid) then

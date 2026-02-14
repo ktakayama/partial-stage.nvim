@@ -22,7 +22,6 @@ It displays diffs from multiple files in a single buffer, allowing
 selective staging of hunks.
 
 The status buffer shows:
-- Current branch and last commit message
 - Unstaged changes with expandable file/hunk tree
 - Staged changes with expandable file/hunk tree
 
@@ -109,7 +108,6 @@ q               Close the partial-stage window.
 The following highlight groups are used. All link to built-in groups
 by default and can be overridden.
 
-  PartialStageBranch      Branch/head info (links to `Title`)
   PartialStageSection     Section headers (links to `Label`)
   PartialStageFile        File paths (links to `Directory`)
   PartialStageHunkHeader  Hunk headers (links to `Function`)

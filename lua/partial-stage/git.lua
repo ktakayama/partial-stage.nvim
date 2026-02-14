@@ -49,37 +49,6 @@ function M.get_diff(cached, on_done)
   git_async(args, {}, on_done)
 end
 
--- Get current branch and last commit message
-function M.get_head_info(on_done)
-  local info = {}
-  local pending = 2
-
-  local function check_done()
-    pending = pending - 1
-    if pending == 0 then
-      on_done(info, nil)
-    end
-  end
-
-  git_async({ "rev-parse", "--abbrev-ref", "HEAD" }, {}, function(out, err)
-    if out then
-      info.branch = vim.trim(out)
-    else
-      info.branch = "HEAD"
-    end
-    check_done()
-  end)
-
-  git_async({ "log", "-1", "--format=%s" }, { ignore_error = true }, function(out, _)
-    if out then
-      info.commit_msg = vim.trim(out)
-    else
-      info.commit_msg = ""
-    end
-    check_done()
-  end)
-end
-
 -- Apply a patch via git apply with stdin
 function M.apply_patch(patch, args, on_done)
   args = args or {}

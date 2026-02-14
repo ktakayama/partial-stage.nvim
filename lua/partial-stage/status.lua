@@ -97,27 +97,11 @@ local function build_help_lines(outline)
 end
 
 -- Build the tree from parsed diff data
-local function build_tree(outline, head_info, unstaged_files, staged_files)
+local function build_tree(outline, unstaged_files, staged_files)
   outline:clear()
 
   -- Help line
   build_help_lines(outline)
-
-  -- Head section
-  local branch = head_info.branch or "HEAD"
-  local msg = head_info.commit_msg or ""
-  local head_text = "Head: " .. branch
-  if msg ~= "" then
-    head_text = head_text .. "  " .. msg
-  end
-  outliner.add_node(outline.root, {
-    type = "section",
-    text = head_text,
-    hl_group = "PartialStageBranch",
-  })
-
-  -- Blank line
-  outliner.add_node(outline.root, { type = "blank", text = "" })
 
   -- Unstaged section
   local unstaged_section = outliner.add_node(outline.root, {
@@ -222,7 +206,6 @@ end
 -- Setup highlight groups
 local function setup_highlights()
   local hl = vim.api.nvim_set_hl
-  hl(0, "PartialStageBranch", { link = "Title", default = true })
   hl(0, "PartialStageSection", { link = "Label", default = true })
   hl(0, "PartialStageFile", { link = "Directory", default = true })
   hl(0, "PartialStageHunkHeader", { link = "Function", default = true })
@@ -235,8 +218,7 @@ function M.refresh()
     return
   end
 
-  local pending = 3
-  local head_info = {}
+  local pending = 2
   local unstaged_diff = ""
   local staged_diff = ""
 
@@ -250,8 +232,6 @@ function M.refresh()
     state.staged_diff = staged_diff
     state.unstaged_files = parser.parse(unstaged_diff)
     state.staged_files = parser.parse(staged_diff)
-    state.head_branch = head_info.branch
-    state.head_commit_msg = head_info.commit_msg
 
     if not state.outline then
       state.outline = outliner.new(state.bufnr)
@@ -263,7 +243,7 @@ function M.refresh()
       cursor = vim.api.nvim_win_get_cursor(state.winid)
     end
 
-    build_tree(state.outline, head_info, state.unstaged_files, state.staged_files)
+    build_tree(state.outline, state.unstaged_files, state.staged_files)
     state.outline:render()
 
     -- Restore cursor position
@@ -275,11 +255,6 @@ function M.refresh()
       vim.api.nvim_win_set_cursor(state.winid, cursor)
     end
   end
-
-  git.get_head_info(function(info, _)
-    head_info = info or {}
-    on_all_done()
-  end)
 
   git.get_diff(false, function(out, _)
     unstaged_diff = out or ""
@@ -307,8 +282,7 @@ function M.refresh_display()
     cursor = vim.api.nvim_win_get_cursor(state.winid)
   end
 
-  local head_info = { branch = state.head_branch or "HEAD", commit_msg = state.head_commit_msg or "" }
-  build_tree(state.outline, head_info, state.unstaged_files, state.staged_files)
+  build_tree(state.outline, state.unstaged_files, state.staged_files)
   state.outline:render()
 
   if cursor and state.winid and vim.api.nvim_win_is_valid(state.winid) then

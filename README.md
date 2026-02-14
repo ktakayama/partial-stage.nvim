@@ -32,8 +32,6 @@ Run `:PartialStage` to open the status buffer.
 ```
 s:stage/unstage  x:discard  <Tab>:fold  gs:split  <CR>:jump  q:close
 
-Head: main  Last commit message
-
 Unstaged (2)
   v src/file_a.lua
     @@ -16,10 +17,14 @@

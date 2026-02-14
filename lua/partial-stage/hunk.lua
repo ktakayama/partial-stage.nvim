@@ -140,7 +140,7 @@ local function get_visual_hunk_lines()
 
   for line = start_line, end_line do
     local node = st.outline:node_at_line(line)
-    if node and node.type == "diff_line" then
+    if node and node.type == "diff_line" and node.hunk_line_index then
       if not hunk_data then
         hunk_data = node.hunk_data
         file_data = node.file_data
@@ -148,23 +148,7 @@ local function get_visual_hunk_lines()
       end
       -- Only include lines from the same hunk
       if node.hunk_data == hunk_data then
-        -- Find the index of this line in hunk.lines
-        for i, hline in ipairs(hunk_data.lines) do
-          if hline == node.text then
-            -- Check this hasn't been added already
-            local already = false
-            for _, idx in ipairs(selected_indices) do
-              if idx == i then
-                already = true
-                break
-              end
-            end
-            if not already then
-              table.insert(selected_indices, i)
-              break
-            end
-          end
-        end
+        table.insert(selected_indices, node.hunk_line_index)
       end
     end
   end

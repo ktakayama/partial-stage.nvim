@@ -113,7 +113,7 @@ local function build_tree(outline, head_info, unstaged_files, staged_files)
         section = "unstaged",
       })
 
-      for _, line in ipairs(hunk.lines) do
+      for line_idx, line in ipairs(hunk.lines) do
         local hl = nil
         if line:match("^%+") then
           hl = "DiffAdd"
@@ -127,6 +127,7 @@ local function build_tree(outline, head_info, unstaged_files, staged_files)
           section = "unstaged",
           hunk_data = hunk,
           file_data = file,
+          hunk_line_index = line_idx,
         })
       end
     end
@@ -163,7 +164,7 @@ local function build_tree(outline, head_info, unstaged_files, staged_files)
         section = "staged",
       })
 
-      for _, line in ipairs(hunk.lines) do
+      for line_idx, line in ipairs(hunk.lines) do
         local hl = nil
         if line:match("^%+") then
           hl = "DiffAdd"
@@ -177,6 +178,7 @@ local function build_tree(outline, head_info, unstaged_files, staged_files)
           section = "staged",
           hunk_data = hunk,
           file_data = file,
+          hunk_line_index = line_idx,
         })
       end
     end
@@ -269,6 +271,13 @@ end
 
 -- Open the status buffer
 function M.open()
+  -- Check if we're in a git repository
+  local result = vim.system({ "git", "rev-parse", "--git-dir" }, { text = true }):wait()
+  if result.code ~= 0 then
+    vim.notify("Not a git repository", vim.log.levels.ERROR)
+    return
+  end
+
   if is_open() then
     vim.api.nvim_set_current_win(state.winid)
     M.refresh()
@@ -282,6 +291,16 @@ function M.open()
 
   -- Setup keybindings
   require("partial-stage.keymaps").setup(bufnr)
+
+  -- Cleanup when buffer is wiped
+  vim.api.nvim_create_autocmd("BufWipeout", {
+    buffer = bufnr,
+    callback = function()
+      state.bufnr = nil
+      state.winid = nil
+      state.outline = nil
+    end,
+  })
 
   M.refresh()
 end

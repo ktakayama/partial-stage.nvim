@@ -65,6 +65,19 @@ function M.discard_hunk(file, hunk, on_done)
   end)
 end
 
+-- Discard partial hunk (selected lines only)
+function M.discard_partial(file, hunk, selected_indices, on_done)
+  local patch = parser.make_partial_patch(file, hunk, selected_indices, "stage")
+  git.apply_patch(patch, { "--reverse", "--whitespace=nowarn" }, function(_, err)
+    if err then
+      vim.notify("Failed to discard partial hunk: " .. err, vim.log.levels.ERROR)
+    end
+    if on_done then
+      on_done(err)
+    end
+  end)
+end
+
 -- Stage partial hunk (selected lines)
 function M.stage_partial(file, hunk, selected_indices, on_done)
   local patch = parser.make_partial_patch(file, hunk, selected_indices, "stage")
@@ -214,24 +227,30 @@ end
 
 -- Discard visually selected lines (unstaged only)
 function M.discard_visual()
-  -- Capture context while still in visual mode
-  local ctx = get_hunk_context()
+  -- Capture visual selection while still in visual mode
+  local sel = get_visual_hunk_lines()
   vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
 
-  if not ctx or ctx.section ~= "unstaged" then
+  if not sel then
+    -- Fallback to normal mode discard
+    vim.schedule(function()
+      M.discard()
+    end)
+    return
+  end
+
+  if sel.section ~= "unstaged" then
     vim.notify("Discard only works in the Unstaged section", vim.log.levels.WARN)
     return
   end
 
-  if ctx.hunk and ctx.file then
-    vim.schedule(function()
-      confirm("Discard this hunk?", function()
-        M.discard_hunk(ctx.file, ctx.hunk, function()
-          status.refresh()
-        end)
+  vim.schedule(function()
+    confirm("Discard selected lines?", function()
+      M.discard_partial(sel.file, sel.hunk, sel.selected_indices, function()
+        status.refresh()
       end)
     end)
-  end
+  end)
 end
 
 -- Jump to file at cursor position

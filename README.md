@@ -82,6 +82,10 @@ require("partial-stage").setup({
 
 Set any keymap to `false` to disable it.
 
+## Acknowledgements
+
+- [gitabra](https://github.com/Odie/gitabra) - tree-based status buffer design
+
 ## License
 
 MIT

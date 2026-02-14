@@ -24,6 +24,7 @@ selective staging of hunks.
 The status buffer shows:
 - Unstaged changes with expandable file/hunk tree
 - Staged changes with expandable file/hunk tree
+- Untracked files (new files not yet tracked by git)
 
 ==============================================================================
 2. REQUIREMENTS                                *partial-stage-requirements*
@@ -41,6 +42,9 @@ In the status buffer, navigate to a hunk and press `s` to stage it
 
 Use visual selection + `s` to stage/unstage specific lines within
 a hunk.
+
+Untracked files appear in a separate section at the bottom. Press `s`
+on an untracked file to stage it (equivalent to `git add`).
 
 ==============================================================================
 4. CONFIGURATION                            *partial-stage-configuration*

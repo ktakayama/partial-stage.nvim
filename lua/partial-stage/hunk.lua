@@ -129,6 +129,8 @@ function M.toggle_stage()
       git.stage_file(ctx.file.b_file, on_done)
     elseif ctx.section == "staged" then
       git.reset_file(ctx.file.b_file, on_done)
+    elseif ctx.section == "untracked" then
+      git.stage_file(ctx.file.b_file, on_done)
     end
   end
 end
@@ -211,8 +213,12 @@ end
 -- Discard hunk under cursor (normal mode, unstaged only)
 function M.discard()
   local ctx = get_hunk_context()
-  if not ctx or ctx.section ~= "unstaged" then
-    vim.notify("Discard only works in the Unstaged section", vim.log.levels.WARN)
+  if not ctx or (ctx.section ~= "unstaged") then
+    if ctx and ctx.section == "untracked" then
+      vim.notify("Cannot discard untracked files from here", vim.log.levels.WARN)
+    else
+      vim.notify("Discard only works in the Unstaged section", vim.log.levels.WARN)
+    end
     return
   end
 
@@ -240,7 +246,11 @@ function M.discard_visual()
   end
 
   if sel.section ~= "unstaged" then
-    vim.notify("Discard only works in the Unstaged section", vim.log.levels.WARN)
+    if sel.section == "untracked" then
+      vim.notify("Cannot discard untracked files from here", vim.log.levels.WARN)
+    else
+      vim.notify("Discard only works in the Unstaged section", vim.log.levels.WARN)
+    end
     return
   end
 

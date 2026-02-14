@@ -37,10 +37,10 @@ The status buffer shows:
 
 Run `:PartialStage` to open the status buffer.
 
-In the status buffer, navigate to a hunk and press `dp` to stage it
+In the status buffer, navigate to a hunk and press `s` to stage it
 (in the Unstaged section) or unstage it (in the Staged section).
 
-Use visual selection + `dp` to stage/unstage specific lines within
+Use visual selection + `s` to stage/unstage specific lines within
 a hunk.
 
 ==============================================================================
@@ -58,7 +58,7 @@ Call `setup()` to configure the plugin. All options are optional.
       expanded = "v",
     },
     keymaps = {
-      toggle_stage = "dp",    -- stage or unstage hunk/file
+      toggle_stage = "s",     -- stage or unstage hunk/file
       discard = "x",          -- discard hunk (unstaged only)
       toggle_fold = "<Tab>",  -- toggle file fold
       jump = "<CR>",          -- jump to file
@@ -76,8 +76,8 @@ Set any keymap to `false` to disable it.
 These keymaps are active in the partial-stage status buffer.
 All are configurable via |partial-stage-configuration|.
 
-                                                  *partial-stage-dp*
-dp              Stage the hunk under the cursor (Unstaged section) or
+                                                  *partial-stage-s*
+s               Stage the hunk under the cursor (Unstaged section) or
                 unstage it (Staged section). On a file node, stage/unstage
                 the entire file.
 

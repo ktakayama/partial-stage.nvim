@@ -10,7 +10,7 @@ local defaults = {
     expanded = "v",
   },
   keymaps = {
-    toggle_stage = "dp",
+    toggle_stage = "s",
     discard = "x",
     toggle_fold = "<Tab>",
     jump = "<CR>",

@@ -30,7 +30,7 @@ require("partial-stage").setup()
 Run `:PartialStage` to open the status buffer.
 
 ```
-dp:stage/unstage  x:discard  <Tab>:fold  gs:split  <CR>:jump  q:close
+s:stage/unstage  x:discard  <Tab>:fold  gs:split  <CR>:jump  q:close
 
 Head: main  Last commit message
 
@@ -52,7 +52,7 @@ All keymaps are active only in the status buffer and are configurable.
 
 | Key | Mode | Action |
 |-----|------|--------|
-| `dp` | n/v | Stage (unstaged section) or unstage (staged section). Visual mode for partial hunk. |
+| `s` | n/v | Stage (unstaged section) or unstage (staged section). Visual mode for partial hunk. |
 | `x` | n/v | Discard hunk. Unstaged section only. Visual mode for partial discard. |
 | `<Tab>` | n | Toggle fold on file node |
 | `<CR>` | n | Jump to file at hunk location |
@@ -72,7 +72,7 @@ require("partial-stage").setup({
     expanded = "v",
   },
   keymaps = {
-    toggle_stage = "dp",
+    toggle_stage = "s",
     discard = "x",
     toggle_fold = "<Tab>",
     jump = "<CR>",

@@ -215,6 +215,8 @@ function M.refresh()
     state.staged_diff = staged_diff
     state.unstaged_files = parser.parse(unstaged_diff)
     state.staged_files = parser.parse(staged_diff)
+    state.head_branch = head_info.branch
+    state.head_commit_msg = head_info.commit_msg
 
     if not state.outline then
       state.outline = outliner.new(state.bufnr)
@@ -253,6 +255,34 @@ function M.refresh()
     staged_diff = out or ""
     on_all_done()
   end)
+end
+
+-- Rebuild tree display from current in-memory data (without re-fetching git)
+function M.refresh_display()
+  if not state.bufnr or not vim.api.nvim_buf_is_valid(state.bufnr) then
+    return
+  end
+
+  if not state.outline then
+    state.outline = outliner.new(state.bufnr)
+  end
+
+  local cursor = nil
+  if state.winid and vim.api.nvim_win_is_valid(state.winid) then
+    cursor = vim.api.nvim_win_get_cursor(state.winid)
+  end
+
+  local head_info = { branch = state.head_branch or "HEAD", commit_msg = state.head_commit_msg or "" }
+  build_tree(state.outline, head_info, state.unstaged_files, state.staged_files)
+  state.outline:render()
+
+  if cursor and state.winid and vim.api.nvim_win_is_valid(state.winid) then
+    local line_count = vim.api.nvim_buf_line_count(state.bufnr)
+    if cursor[1] > line_count then
+      cursor[1] = line_count
+    end
+    vim.api.nvim_win_set_cursor(state.winid, cursor)
+  end
 end
 
 -- Get the node at the current cursor position

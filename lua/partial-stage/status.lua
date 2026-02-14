@@ -65,9 +65,43 @@ local function open_window(bufnr)
   return winid
 end
 
+-- Build help lines from current keymap config
+local function build_help_lines(outline)
+  local km = config.values.keymaps
+  local entries = {}
+  if km.toggle_stage then
+    table.insert(entries, km.toggle_stage .. ":stage/unstage")
+  end
+  if km.discard then
+    table.insert(entries, km.discard .. ":discard")
+  end
+  if km.toggle_fold then
+    table.insert(entries, km.toggle_fold .. ":fold")
+  end
+  if km.split_hunk then
+    table.insert(entries, km.split_hunk .. ":split")
+  end
+  if km.jump then
+    table.insert(entries, km.jump .. ":jump")
+  end
+  if km.close then
+    table.insert(entries, km.close .. ":close")
+  end
+
+  outliner.add_node(outline.root, {
+    type = "help",
+    text = table.concat(entries, "  "),
+    hl_group = "PartialStageHelp",
+  })
+  outliner.add_node(outline.root, { type = "blank", text = "" })
+end
+
 -- Build the tree from parsed diff data
 local function build_tree(outline, head_info, unstaged_files, staged_files)
   outline:clear()
+
+  -- Help line
+  build_help_lines(outline)
 
   -- Head section
   local branch = head_info.branch or "HEAD"
@@ -192,6 +226,7 @@ local function setup_highlights()
   hl(0, "PartialStageSection", { link = "Label", default = true })
   hl(0, "PartialStageFile", { link = "Directory", default = true })
   hl(0, "PartialStageHunkHeader", { link = "Function", default = true })
+  hl(0, "PartialStageHelp", { link = "Comment", default = true })
 end
 
 -- Refresh the buffer content

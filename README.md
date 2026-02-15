@@ -3,7 +3,7 @@
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![test](https://github.com/ktakayama/partial-stage.nvim/actions/workflows/test.yml/badge.svg)](https://github.com/ktakayama/partial-stage.nvim/actions/workflows/test.yml)
 
-partial-stage.nvim is a Neovim plugin that brings `git add -p` style staging to a single status buffer.
+A Neovim plugin that provides `git add -p` style staging with an interactive UI.
 
 ## Requirements
 
@@ -52,7 +52,7 @@ Staged (1)
 
 ## Keymaps
 
-All keymaps are active only in the status buffer and are configurable.
+All keymaps are active only in the status buffer.
 
 | Key | Mode | Action |
 |-----|------|--------|
@@ -103,7 +103,7 @@ augroup partial_stage_keymap
 augroup END
 ```
 
-With this setup, you can stage hunks with `s` and then press `cc` to commit — all without leaving the buffer.
+With this setup, you can stage hunks with `s` and then press `cc` to commit.
 
 #### Custom highlight colors
 

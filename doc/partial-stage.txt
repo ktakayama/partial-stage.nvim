@@ -17,8 +17,8 @@ CONTENTS                                          *partial-stage-contents*
 ==============================================================================
 1. INTRODUCTION                                *partial-stage-introduction*
 
-partial-stage.nvim provides `git add -p` functionality within Neovim.
-It displays diffs from multiple files in a single buffer, allowing
+partial-stage.nvim provides `git add -p` style staging with an
+interactive UI. It displays diffs from multiple files, allowing
 selective staging of hunks.
 
 The status buffer shows:

@@ -126,5 +126,9 @@ Diff lines use the built-in `DiffAdd` and `DiffDelete` groups.
 :PartialStage   Open the partial-stage status buffer. If already open,
                 focus and refresh it.
 
+                                                  *:PartialStageClose*
+:PartialStageClose
+                Close the partial-stage status buffer window.
+
 ==============================================================================
  vim:tw=78:ts=8:ft=help:norl:

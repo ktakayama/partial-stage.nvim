@@ -17,7 +17,7 @@ A Neovim plugin that provides `git add -p` style staging with an interactive UI.
 ```lua
 {
   "ktakayama/partial-stage.nvim",
-  cmd = "PartialStage",
+  cmd = { "PartialStage", "PartialStageClose" },
   opts = {},
 }
 ```
@@ -30,7 +30,7 @@ require("partial-stage").setup()
 
 ## Usage
 
-Run `:PartialStage` to open the status buffer.
+Run `:PartialStage` to open the status buffer. Use `:PartialStageClose` to close it.
 
 ```
 s:stage/unstage  x:discard  <Tab>:fold  gs:split  <CR>:jump  q:close

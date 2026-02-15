@@ -1,5 +1,8 @@
 # partial-stage.nvim
 
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![test](https://github.com/ktakayama/partial-stage.nvim/actions/workflows/test.yml/badge.svg)](https://github.com/ktakayama/partial-stage.nvim/actions/workflows/test.yml)
+
 Git `add -p` functionality within Neovim. Displays diffs from multiple files in a single buffer, allowing selective staging of hunks.
 
 ## Requirements

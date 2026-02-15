@@ -3,7 +3,7 @@
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![test](https://github.com/ktakayama/partial-stage.nvim/actions/workflows/test.yml/badge.svg)](https://github.com/ktakayama/partial-stage.nvim/actions/workflows/test.yml)
 
-Git `add -p` functionality within Neovim. Displays diffs from multiple files in a single buffer, allowing selective staging of hunks.
+partial-stage.nvim is a Neovim plugin that brings `git add -p` style staging to a single status buffer.
 
 ## Requirements
 
@@ -56,7 +56,7 @@ All keymaps are active only in the status buffer and are configurable.
 
 | Key | Mode | Action |
 |-----|------|--------|
-| `s` | n/v | Stage (unstaged section) or unstage (staged section). Visual mode for partial hunk. |
+| `s` | n/v | Stage (unstaged/untracked sections) or unstage (staged section). Visual mode for partial hunk. |
 | `x` | n/v | Discard hunk. Unstaged section only. Visual mode for partial discard. |
 | `<Tab>` | n | Toggle fold on file node |
 | `<CR>` | n | Jump to file at hunk location |

@@ -88,6 +88,44 @@ require("partial-stage").setup({
 
 Set any keymap to `false` to disable it.
 
+### Examples
+
+#### Commit from the status buffer
+
+Add commit shortcuts directly in the partial-stage buffer.
+This example uses [vim-gin](https://github.com/lambdalisue/vim-gin):
+
+```vim
+augroup partial_stage_keymap
+  autocmd!
+  autocmd FileType partial-stage nnoremap <buffer> cc <Cmd>Gin commit<CR>
+  autocmd FileType partial-stage nnoremap <buffer> ca <Cmd>Gin commit --amend<CR>
+augroup END
+```
+
+With this setup, you can stage hunks with `s` and then press `cc` to commit — all without leaving the buffer.
+
+#### Custom highlight colors
+
+The following highlight groups are available, each linked to a default group:
+
+| Highlight Group | Default Link |
+|---|---|
+| `PartialStageSection` | `Label` |
+| `PartialStageFile` | `Directory` |
+| `PartialStageHunkHeader` | `Function` |
+| `PartialStageHelp` | `Comment` |
+
+Override them in your config to match your preferred color scheme:
+
+```vim
+augroup partial_stage_colors
+  autocmd!
+  autocmd ColorScheme * highlight PartialStageSection guifg=#e0af68 gui=bold
+  autocmd ColorScheme * highlight PartialStageHunkHeader guifg=#7aa2f7 gui=italic
+augroup END
+```
+
 ## Acknowledgements
 
 - [gitabra](https://github.com/Odie/gitabra) - tree-based status buffer design

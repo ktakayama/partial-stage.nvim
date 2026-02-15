@@ -381,6 +381,16 @@ function M.open()
     end,
   })
 
+  -- Refresh when returning to the buffer
+  vim.api.nvim_create_autocmd("BufEnter", {
+    buffer = bufnr,
+    callback = function()
+      if state.winid and vim.api.nvim_win_is_valid(state.winid) then
+        M.refresh()
+      end
+    end,
+  })
+
   M.refresh()
 end
 

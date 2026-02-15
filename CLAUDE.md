@@ -16,6 +16,10 @@ test/                -- Test files (plenary busted)
 doc/                 -- Help documentation
 ```
 
+## Documentation Guidelines
+
+- When adding or changing features, update both README.md and doc/partial-stage.txt to reflect the actual behavior
+
 ## Development Commands
 
 ```bash

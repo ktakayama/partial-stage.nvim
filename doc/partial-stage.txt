@@ -1,4 +1,4 @@
-*partial-stage.txt*    Git add -p functionality within Neovim
+*partial-stage.txt*    Git add -p style staging for Neovim
 
 Author:  ktakayama
 License: MIT
@@ -22,9 +22,9 @@ interactive UI. It displays diffs from multiple files, allowing
 selective staging of hunks.
 
 The status buffer shows:
+- Untracked files (new files not yet tracked by git)
 - Unstaged changes with expandable file/hunk tree
 - Staged changes with expandable file/hunk tree
-- Untracked files (new files not yet tracked by git)
 
 ==============================================================================
 2. REQUIREMENTS                                *partial-stage-requirements*
@@ -43,7 +43,7 @@ In the status buffer, navigate to a hunk and press `s` to stage it
 Use visual selection + `s` to stage/unstage specific lines within
 a hunk.
 
-Untracked files appear in a separate section at the bottom. Press `s`
+Untracked files appear in a separate section at the top. Press `s`
 on an untracked file to stage it (equivalent to `git add`).
 
 ==============================================================================
@@ -76,7 +76,7 @@ Set any keymap to `false` to disable it.
 ==============================================================================
 5. KEYMAPS                                        *partial-stage-keymaps*
 
-These keymaps are active in the partial-stage status buffer.
+All keymaps are active only in the partial-stage status buffer.
 All are configurable via |partial-stage-configuration|.
 
                                                   *partial-stage-s*
@@ -109,8 +109,8 @@ q               Close the partial-stage window.
 ==============================================================================
 6. HIGHLIGHTS                                  *partial-stage-highlights*
 
-The following highlight groups are used. All link to built-in groups
-by default and can be overridden.
+The following highlight groups are available, each linked to a
+default group.
 
   PartialStageSection     Section headers (links to `Label`)
   PartialStageFile        File paths (links to `Directory`)

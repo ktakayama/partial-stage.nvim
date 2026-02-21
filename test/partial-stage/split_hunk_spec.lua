@@ -49,8 +49,12 @@ describe("split_hunk", function()
     local has_old2 = false
     local has_new2 = false
     for _, line in ipairs(h1.lines) do
-      if line == "-old2" then has_old2 = true end
-      if line == "+new2" then has_new2 = true end
+      if line == "-old2" then
+        has_old2 = true
+      end
+      if line == "+new2" then
+        has_new2 = true
+      end
     end
     assert.is_true(has_old2)
     assert.is_true(has_new2)
@@ -60,8 +64,12 @@ describe("split_hunk", function()
     local has_old6 = false
     local has_new6 = false
     for _, line in ipairs(h2.lines) do
-      if line == "-old6" then has_old6 = true end
-      if line == "+new6" then has_new6 = true end
+      if line == "-old6" then
+        has_old6 = true
+      end
+      if line == "+new6" then
+        has_new6 = true
+      end
     end
     assert.is_true(has_old6)
     assert.is_true(has_new6)

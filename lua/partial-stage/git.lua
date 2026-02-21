@@ -4,11 +4,13 @@ local M = {}
 local function git_sync(args, opts)
   opts = opts or {}
   local cmd = vim.list_extend({ "git" }, args)
-  local result = vim.system(cmd, {
-    cwd = opts.cwd,
-    stdin = opts.stdin,
-    text = true,
-  }):wait()
+  local result = vim
+    .system(cmd, {
+      cwd = opts.cwd,
+      stdin = opts.stdin,
+      text = true,
+    })
+    :wait()
 
   if result.code ~= 0 and not opts.ignore_error then
     return nil, (result.stderr or "unknown git error")

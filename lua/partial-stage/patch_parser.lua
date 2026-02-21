@@ -2,8 +2,7 @@ local M = {}
 
 -- Parse a unified diff hunk header "@@ -a,b +c,d @@" or "@@ -a +c @@"
 function M.parse_hunk_header(line)
-  local old_start, old_count, new_start, new_count =
-    line:match("^@@ %-(%d+),(%d+) %+(%d+),(%d+) @@")
+  local old_start, old_count, new_start, new_count = line:match("^@@ %-(%d+),(%d+) %+(%d+),(%d+) @@")
   if old_start then
     return {
       old_start = tonumber(old_start),
@@ -25,8 +24,7 @@ function M.parse_hunk_header(line)
   end
 
   -- Mixed: one has count, the other doesn't
-  old_start, old_count, new_start =
-    line:match("^@@ %-(%d+),(%d+) %+(%d+) @@")
+  old_start, old_count, new_start = line:match("^@@ %-(%d+),(%d+) %+(%d+) @@")
   if old_start then
     return {
       old_start = tonumber(old_start),
@@ -36,8 +34,7 @@ function M.parse_hunk_header(line)
     }
   end
 
-  old_start, new_start, new_count =
-    line:match("^@@ %-(%d+) %+(%d+),(%d+) @@")
+  old_start, new_start, new_count = line:match("^@@ %-(%d+) %+(%d+),(%d+) @@")
   if old_start then
     return {
       old_start = tonumber(old_start),
@@ -52,9 +49,7 @@ end
 
 -- Build a hunk header string from parsed values
 function M.make_hunk_header(header)
-  return string.format("@@ -%d,%d +%d,%d @@",
-    header.old_start, header.old_count,
-    header.new_start, header.new_count)
+  return string.format("@@ -%d,%d +%d,%d @@", header.old_start, header.old_count, header.new_start, header.new_count)
 end
 
 -- Parse unified diff output into structured data
@@ -87,19 +82,23 @@ function M.parse(diff_text)
       i = i + 1
 
     -- Extended headers (index, old mode, new mode, etc.)
-    elseif current_file and not current_hunk and (
-      line:match("^index ") or
-      line:match("^old mode ") or
-      line:match("^new mode ") or
-      line:match("^new file mode ") or
-      line:match("^deleted file mode ") or
-      line:match("^rename from ") or
-      line:match("^rename to ") or
-      line:match("^similarity index ") or
-      line:match("^dissimilarity index ") or
-      line:match("^%-%-%- ") or
-      line:match("^%+%+%+ ")
-    ) then
+    elseif
+      current_file
+      and not current_hunk
+      and (
+        line:match("^index ")
+        or line:match("^old mode ")
+        or line:match("^new mode ")
+        or line:match("^new file mode ")
+        or line:match("^deleted file mode ")
+        or line:match("^rename from ")
+        or line:match("^rename to ")
+        or line:match("^similarity index ")
+        or line:match("^dissimilarity index ")
+        or line:match("^%-%-%- ")
+        or line:match("^%+%+%+ ")
+      )
+    then
       table.insert(current_file.header_lines, line)
       i = i + 1
 
@@ -117,11 +116,7 @@ function M.parse(diff_text)
       i = i + 1
 
     -- Hunk content lines (+, -, space, or \ No newline)
-    elseif current_hunk and (
-      line:match("^[+ -]") or
-      line:match("^\\ ") or
-      line == ""
-    ) then
+    elseif current_hunk and (line:match("^[+ -]") or line:match("^\\ ") or line == "") then
       -- Empty line at the end of diff is just trailing newline, skip
       if line == "" and i == #lines then
         i = i + 1
@@ -129,7 +124,6 @@ function M.parse(diff_text)
         table.insert(current_hunk.lines, line)
         i = i + 1
       end
-
     else
       -- Unrecognized line, skip
       i = i + 1
